@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Perencanaan {
+  id               Int              @id @default(autoincrement())
+  nama_perencanaan String           @db.VarChar(255)
+  total_progress   Int
+  sub_perencanaan  SubPerencanaan[]
+}
+
+model SubPerencanaan {
+  id                   Int         @id @default(autoincrement())
+  perencanaan_id       Int
+  nama_sub_perencanaan String      @db.VarChar(255)
+  progress             Int
+  perencanaan          Perencanaan @relation(fields: [perencanaan_id], references: [id])
+  dokumen              Dokumen[]
+}
+
+model Dokumen {
+  id                 Int             @id @default(autoincrement())
+  sub_perencanaan_id Int
+  nama_dokumen       String          @db.Text
+  status             Boolean
+  sub_perencanaan    SubPerencanaan  @relation(fields: [sub_perencanaan_id], references: [id])
+  status_laporan     StatusLaporan[]
+}
+
+model StatusLaporan {
+  id                 Int      @id @default(autoincrement())
+  dokumen_id         Int
+  tanggal_lapor      DateTime
+  tanggal_verifikasi DateTime
+  keterangan         String   @db.Text
+  dokumen            Dokumen  @relation(fields: [dokumen_id], references: [id])
+}
