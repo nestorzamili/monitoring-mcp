@@ -52,7 +52,11 @@ const NestedTable = () => {
         const response = await fetch("/api/perencanaan");
         if (!response.ok) throw new Error(`Error: ${response.status}`);
         const result = await response.json();
-        Array.isArray(result) ? setData(result) : setError("Wrong data format");
+        if (Array.isArray(result)) {
+          setData(result);
+        } else {
+          setError("Wrong data format");
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
