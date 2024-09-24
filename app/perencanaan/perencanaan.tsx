@@ -77,13 +77,10 @@ const NestedTable = () => {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>PERENCANAAN</CardTitle>
-      </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="font-bold">
               <TableHead>PERENCANAAN</TableHead>
               <TableHead>TARGET</TableHead>
               <TableHead>PROGRES</TableHead>
