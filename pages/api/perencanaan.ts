@@ -19,7 +19,6 @@ export default async function handler(
         });
         return res.status(200).json(allPerencanaan);
 
-      // Handle POST Request: Menambahkan data perencanaan baru
       case "POST":
         const {
           nama_perencanaan,
@@ -45,24 +44,21 @@ export default async function handler(
         });
         return res.status(201).json(newPerencanaan);
 
-      // Handle PUT Request: Update data perencanaan berdasarkan ID
       case "PUT":
         const { id, updatedData } = req.body;
         const updatedPerencanaan = await prisma.perencanaan.update({
-          where: { id: Number(id) },
+          where: { id: id }, // Menggunakan id sebagai string
           data: updatedData,
         });
         return res.status(200).json(updatedPerencanaan);
 
-      // Handle DELETE Request: Hapus perencanaan berdasarkan ID
       case "DELETE":
         const { id: deleteId } = req.body;
         await prisma.perencanaan.delete({
-          where: { id: Number(deleteId) },
+          where: { id: deleteId }, // Menggunakan id sebagai string
         });
         return res.status(204).end();
 
-      // Jika method tidak di-support
       default:
         res.setHeader("Allow", ["GET", "POST", "PUT", "DELETE"]);
         return res.status(405).end(`Method ${req.method} Not Allowed`);

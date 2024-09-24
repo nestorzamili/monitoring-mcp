@@ -15,7 +15,7 @@ datasource db {
 }
 
 model Perencanaan {
-  id                Int              @id @default(autoincrement())
+  id                String           @id @default(uuid())
   nama_perencanaan  String
   target            Int
   progres           Int
@@ -23,25 +23,32 @@ model Perencanaan {
   tanggal_lapor     DateTime?
   tanggal_verifikasi DateTime?
   keterangan        String?
+  created_at        DateTime         @default(now())
+  updated_at        DateTime         @updatedAt
   sub_perencanaan   SubPerencanaan[]
 }
 
 model SubPerencanaan {
-  id                 Int               @id @default(autoincrement())
-  perencanaan        Perencanaan       @relation(fields: [perencanaanId], references: [id])
-  perencanaanId      Int
+  id                 String           @id @default(uuid())
+  perencanaan        Perencanaan      @relation(fields: [perencanaanId], references: [id])
+  perencanaanId      String
   nama_sub_perencanaan String
   target             Int
   progres            Int
+  status             String
+  created_at         DateTime         @default(now())
+  updated_at         DateTime         @updatedAt
   item_sub_perencanaan ItemSubPerencanaan[]
 }
 
 model ItemSubPerencanaan {
-  id                 Int               @id @default(autoincrement())
-  sub_perencanaan    SubPerencanaan    @relation(fields: [subPerencanaanId], references: [id])
-  subPerencanaanId   Int
+  id                 String           @id @default(uuid())
+  sub_perencanaan    SubPerencanaan   @relation(fields: [subPerencanaanId], references: [id])
+  subPerencanaanId   String
   nama_item          String
-  target             Int
-  progres            Int
-  penanggung_jawab   String
+  progres            Boolean
+  status             String
+  instansi           String
+  created_at         DateTime         @default(now())
+  updated_at         DateTime         @updatedAt
 }

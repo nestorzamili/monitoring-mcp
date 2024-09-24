@@ -11,14 +11,15 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import React from "react";
 
 // Define types for the data based on the API response
 interface ItemSubPerencanaan {
   id: number;
   nama_item: string;
-  target: number;
-  progres: number;
-  penanggung_jawab: string;
+  progres: boolean;
+  status: string;
+  instansi: string;
 }
 
 interface SubPerencanaan {
@@ -47,30 +48,34 @@ const NestedTable = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchData() {
+    const fetchData = async () => {
       try {
         const response = await fetch("/api/perencanaan");
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
         const result = await response.json();
-        if (Array.isArray(result)) {
-          setData(result);
-        } else {
-          setError("Data is not in the correct format.");
-        }
+        Array.isArray(result) ? setData(result) : setError("Wrong data format");
       } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("An unknown error occurred.");
-        }
+        setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
       }
-    }
+    };
     fetchData();
   }, []);
+
+  const handleStatusChange = (itemId: number, checked: boolean) => {
+    setData((prevData) =>
+      prevData.map((perencanaan) => ({
+        ...perencanaan,
+        sub_perencanaan: perencanaan.sub_perencanaan.map((sub) => ({
+          ...sub,
+          item_sub_perencanaan: sub.item_sub_perencanaan.map((item) =>
+            item.id === itemId ? { ...item, progres: checked } : item
+          ),
+        })),
+      }))
+    );
+  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -78,40 +83,34 @@ const NestedTable = () => {
   return (
     <Card>
       <CardContent>
-        <Table>
+        <Table className="w-full table-auto text-sm text-left text-gray-700">
           <TableHeader>
-            <TableRow className="font-bold">
-              <TableHead>PERENCANAAN</TableHead>
-              <TableHead>TARGET</TableHead>
-              <TableHead>PROGRES</TableHead>
-              <TableHead>PENANGGUNG JAWAB</TableHead>
-              <TableHead>STATUS</TableHead>
-              <TableHead>TANGGAL LAPOR</TableHead>
-              <TableHead>TANGGAL VERIFIKASI</TableHead>
-              <TableHead>KETERANGAN</TableHead>
+            <TableRow>
+              {[
+                "PERENCANAAN",
+                "TARGET",
+                "PROGRES",
+                "INSTANSI",
+                "STATUS",
+                "TANGGAL LAPOR",
+                "TANGGAL VERIFIKASI",
+                "KETERANGAN",
+              ].map((head) => (
+                <TableHead key={head}>{head}</TableHead>
+              ))}
             </TableRow>
           </TableHeader>
           <TableBody>
             {data.map((perencanaan) => (
-              <>
-                <TableRow key={perencanaan.id}>
+              <React.Fragment key={perencanaan.id}>
+                <TableRow>
                   <TableCell>
-                    <div className="font-bold">
-                      {perencanaan.nama_perencanaan}
-                    </div>
+                    <strong>{perencanaan.nama_perencanaan}</strong>
                   </TableCell>
-                  <TableCell>{perencanaan.target}</TableCell>
+                  <TableCell>{perencanaan.target}%</TableCell>
                   <TableCell>{perencanaan.progres}%</TableCell>
                   <TableCell />
-                  <TableCell>
-                    <Badge
-                      color={perencanaan.progres === 100 ? "success" : "danger"}
-                    >
-                      {perencanaan.progres === 100
-                        ? "Completed"
-                        : "In Progress"}
-                    </Badge>
-                  </TableCell>
+                  <TableCell>{perencanaan.status}</TableCell>
                   <TableCell>
                     {perencanaan.tanggal_lapor
                       ? new Date(perencanaan.tanggal_lapor).toLocaleDateString(
@@ -126,17 +125,15 @@ const NestedTable = () => {
                         ).toLocaleDateString("id-ID")
                       : "-"}
                   </TableCell>
-                  <TableCell>{perencanaan.keterangan || "-"}</TableCell>
+                  <TableCell>{perencanaan.keterangan}</TableCell>
                 </TableRow>
                 {perencanaan.sub_perencanaan.map((sub) => (
-                  <>
-                    <TableRow key={sub.id}>
+                  <React.Fragment key={sub.id}>
+                    <TableRow>
                       <TableCell className="pl-8">
-                        <div className="font-medium">
-                          {sub.nama_sub_perencanaan}
-                        </div>
+                        <em>{sub.nama_sub_perencanaan}</em>
                       </TableCell>
-                      <TableCell>{sub.target}</TableCell>
+                      <TableCell>{sub.target}%</TableCell>
                       <TableCell>{sub.progres}%</TableCell>
                       <TableCell />
                       <TableCell />
@@ -149,18 +146,26 @@ const NestedTable = () => {
                         <TableCell className="pl-16">
                           {item.nama_item}
                         </TableCell>
-                        <TableCell>{item.target}</TableCell>
-                        <TableCell>{item.progres}%</TableCell>
-                        <TableCell>{item.penanggung_jawab}</TableCell>
+                        <TableCell />
+                        <TableCell>
+                          <input
+                            type="checkbox"
+                            checked={item.progres}
+                            onChange={(e) =>
+                              handleStatusChange(item.id, e.target.checked)
+                            }
+                          />
+                        </TableCell>
+                        <TableCell>{item.instansi}</TableCell>
                         <TableCell />
                         <TableCell />
                         <TableCell />
                         <TableCell />
                       </TableRow>
                     ))}
-                  </>
+                  </React.Fragment>
                 ))}
-              </>
+              </React.Fragment>
             ))}
           </TableBody>
         </Table>
