@@ -45,12 +45,13 @@ export default async function handler(
         return res.status(201).json(newPerencanaan);
 
       case "PUT":
-        const { id, updatedData } = req.body;
-        const updatedPerencanaan = await prisma.perencanaan.update({
-          where: { id: id }, // Menggunakan id sebagai string
-          data: updatedData,
+        // update value progress itemsubperencanaan
+        const { id, progres: updatedProgres } = req.body;
+        await prisma.itemSubPerencanaan.update({
+          where: { id },
+          data: { progres: updatedProgres },
         });
-        return res.status(200).json(updatedPerencanaan);
+        return res.status(204).end();
 
       case "DELETE":
         const { id: deleteId } = req.body;

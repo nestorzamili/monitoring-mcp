@@ -9,61 +9,33 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import React from "react";
+import { Perencanaan } from "./types";
+import { fetchData, updateData } from "./api";
 
-// Define types for the data based on the API response
-interface ItemSubPerencanaan {
-  id: number;
-  nama_item: string;
-  progres: boolean;
-  status: string;
-  instansi: string;
-}
-
-interface SubPerencanaan {
-  id: number;
-  nama_sub_perencanaan: string;
-  target: number;
-  progres: number;
-  item_sub_perencanaan: ItemSubPerencanaan[];
-}
-
-interface Perencanaan {
-  id: number;
-  nama_perencanaan: string;
-  target: number;
-  progres: number;
-  status: string;
-  tanggal_lapor: string | null;
-  tanggal_verifikasi: string | null;
-  keterangan: string | null;
-  sub_perencanaan: SubPerencanaan[];
-}
-
-const NestedTable = () => {
+const PerencanaanTable = () => {
   const [data, setData] = useState<Perencanaan[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [changedItems, setChangedItems] = useState<{ [key: string]: boolean }>(
+    {}
+  );
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loadData = async () => {
       try {
-        const response = await fetch("/api/perencanaan");
-        if (!response.ok) throw new Error(`Error: ${response.status}`);
-        const result = await response.json();
-        if (Array.isArray(result)) {
-          setData(result);
-        } else {
-          setError("Wrong data format");
-        }
+        const result = await fetchData();
+        setData(result);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
+    loadData();
   }, []);
 
   const handleStatusChange = (itemId: number, checked: boolean) => {
@@ -78,103 +50,138 @@ const NestedTable = () => {
         })),
       }))
     );
+    setChangedItems((prev) => ({ ...prev, [itemId]: checked }));
   };
 
-  if (loading) return <div>Loading...</div>;
+  const syncChanges = async () => {
+    try {
+      setLoading(true);
+      await Promise.all(
+        Object.entries(changedItems).map(([id, progres]) =>
+          updateData(id, progres)
+        )
+      );
+      setChangedItems({});
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading)
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Button variant="ghost" disabled>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Mohon tunggu
+        </Button>
+      </div>
+    );
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <Card>
-      <CardContent>
-        <Table className="w-full table-auto text-sm text-left text-gray-700">
-          <TableHeader>
-            <TableRow>
-              {[
-                "PERENCANAAN",
-                "TARGET",
-                "PROGRES",
-                "INSTANSI",
-                "STATUS",
-                "TANGGAL LAPOR",
-                "TANGGAL VERIFIKASI",
-                "KETERANGAN",
-              ].map((head) => (
-                <TableHead key={head}>{head}</TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.map((perencanaan) => (
-              <React.Fragment key={perencanaan.id}>
-                <TableRow>
-                  <TableCell>
-                    <strong>{perencanaan.nama_perencanaan}</strong>
-                  </TableCell>
-                  <TableCell>{perencanaan.target}%</TableCell>
-                  <TableCell>{perencanaan.progres}%</TableCell>
-                  <TableCell />
-                  <TableCell>{perencanaan.status}</TableCell>
-                  <TableCell>
-                    {perencanaan.tanggal_lapor
-                      ? new Date(perencanaan.tanggal_lapor).toLocaleDateString(
-                          "id-ID"
-                        )
-                      : "-"}
-                  </TableCell>
-                  <TableCell>
-                    {perencanaan.tanggal_verifikasi
-                      ? new Date(
-                          perencanaan.tanggal_verifikasi
-                        ).toLocaleDateString("id-ID")
-                      : "-"}
-                  </TableCell>
-                  <TableCell>{perencanaan.keterangan}</TableCell>
-                </TableRow>
-                {perencanaan.sub_perencanaan.map((sub) => (
-                  <React.Fragment key={sub.id}>
-                    <TableRow>
-                      <TableCell className="pl-8">
-                        <em>{sub.nama_sub_perencanaan}</em>
-                      </TableCell>
-                      <TableCell>{sub.target}%</TableCell>
-                      <TableCell>{sub.progres}%</TableCell>
-                      <TableCell />
-                      <TableCell />
-                      <TableCell />
-                      <TableCell />
-                      <TableCell />
-                    </TableRow>
-                    {sub.item_sub_perencanaan.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell className="pl-16">
-                          {item.nama_item}
+    <div className="flex flex-col items-end space-y-2">
+      <Button
+        onClick={syncChanges}
+        disabled={Object.keys(changedItems).length === 0}
+      >
+        SYNC
+      </Button>
+      <Card>
+        <CardContent>
+          <Table className="w-full table-auto text-sm text-left text-gray-700">
+            <TableHeader>
+              <TableRow>
+                {[
+                  "PERENCANAAN",
+                  "TARGET",
+                  "PROGRES",
+                  "INSTANSI",
+                  "STATUS",
+                  "TANGGAL LAPOR",
+                  "TANGGAL VERIFIKASI",
+                  "KETERANGAN",
+                ].map((head) => (
+                  <TableHead key={head} className="font-semibold">
+                    {head}
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.map((perencanaan) => (
+                <React.Fragment key={perencanaan.id}>
+                  <TableRow>
+                    <TableCell>
+                      <strong>{perencanaan.nama_perencanaan}</strong>
+                    </TableCell>
+                    <TableCell>{perencanaan.target}%</TableCell>
+                    <TableCell>{perencanaan.progres}%</TableCell>
+                    <TableCell />
+                    <TableCell>{perencanaan.status}</TableCell>
+                    <TableCell>
+                      {perencanaan.tanggal_lapor
+                        ? new Date(
+                            perencanaan.tanggal_lapor
+                          ).toLocaleDateString("id-ID")
+                        : "-"}
+                    </TableCell>
+                    <TableCell>
+                      {perencanaan.tanggal_verifikasi
+                        ? new Date(
+                            perencanaan.tanggal_verifikasi
+                          ).toLocaleDateString("id-ID")
+                        : "-"}
+                    </TableCell>
+                    <TableCell>{perencanaan.keterangan}</TableCell>
+                  </TableRow>
+                  {perencanaan.sub_perencanaan.map((sub) => (
+                    <React.Fragment key={sub.id}>
+                      <TableRow>
+                        <TableCell className="pl-8">
+                          <em>{sub.nama_sub_perencanaan}</em>
                         </TableCell>
+                        <TableCell>{sub.target}%</TableCell>
+                        <TableCell>{sub.progres}%</TableCell>
                         <TableCell />
-                        <TableCell>
-                          <input
-                            type="checkbox"
-                            checked={item.progres}
-                            onChange={(e) =>
-                              handleStatusChange(item.id, e.target.checked)
-                            }
-                          />
-                        </TableCell>
-                        <TableCell>{item.instansi}</TableCell>
                         <TableCell />
                         <TableCell />
                         <TableCell />
                         <TableCell />
                       </TableRow>
-                    ))}
-                  </React.Fragment>
-                ))}
-              </React.Fragment>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+                      {sub.item_sub_perencanaan.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell className="pl-16">
+                            {item.nama_item}
+                          </TableCell>
+                          <TableCell />
+                          <TableCell>
+                            <input
+                              type="checkbox"
+                              checked={item.progres}
+                              onChange={(e) =>
+                                handleStatusChange(item.id, e.target.checked)
+                              }
+                            />
+                          </TableCell>
+                          <TableCell>{item.instansi}</TableCell>
+                          <TableCell />
+                          <TableCell />
+                          <TableCell />
+                          <TableCell />
+                        </TableRow>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </React.Fragment>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
-export default NestedTable;
+export default PerencanaanTable;
