@@ -14,35 +14,33 @@ datasource db {
 }
 
 model Perencanaan {
-  id               Int              @id @default(autoincrement())
-  nama_perencanaan String           @db.VarChar(255)
-  total_progress   Int
-  sub_perencanaan  SubPerencanaan[]
+  id                Int              @id @default(autoincrement())
+  nama_perencanaan  String
+  target            Int
+  progres           Int
+  status            String?
+  tanggal_lapor     DateTime?
+  tanggal_verifikasi DateTime?
+  keterangan        String?
+  sub_perencanaan   SubPerencanaan[]
 }
 
 model SubPerencanaan {
-  id                   Int         @id @default(autoincrement())
-  perencanaan_id       Int
-  nama_sub_perencanaan String      @db.VarChar(255)
-  progress             Int
-  perencanaan          Perencanaan @relation(fields: [perencanaan_id], references: [id])
-  dokumen              Dokumen[]
+  id                 Int               @id @default(autoincrement())
+  perencanaan        Perencanaan       @relation(fields: [perencanaanId], references: [id])
+  perencanaanId      Int
+  nama_sub_perencanaan String
+  target             Int
+  progres            Int
+  item_sub_perencanaan ItemSubPerencanaan[]
 }
 
-model Dokumen {
-  id                 Int             @id @default(autoincrement())
-  sub_perencanaan_id Int
-  nama_dokumen       String          @db.Text
-  status             Boolean
-  sub_perencanaan    SubPerencanaan  @relation(fields: [sub_perencanaan_id], references: [id])
-  status_laporan     StatusLaporan[]
-}
-
-model StatusLaporan {
-  id                 Int      @id @default(autoincrement())
-  dokumen_id         Int
-  tanggal_lapor      DateTime
-  tanggal_verifikasi DateTime
-  keterangan         String   @db.Text
-  dokumen            Dokumen  @relation(fields: [dokumen_id], references: [id])
+model ItemSubPerencanaan {
+  id                 Int               @id @default(autoincrement())
+  sub_perencanaan    SubPerencanaan    @relation(fields: [subPerencanaanId], references: [id])
+  subPerencanaanId   Int
+  nama_item          String
+  target             Int
+  progres            Int
+  penanggung_jawab   String
 }
