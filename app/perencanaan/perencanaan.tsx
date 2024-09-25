@@ -20,21 +20,23 @@ const PerencanaanTable = () => {
   const [data, setData] = useState<Perencanaan[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [changedItems, setChangedItems] = useState<{ [key: string]: boolean }>(
+  const [changedItems, setChangedItems] = useState<{ [key: number]: boolean }>(
     {}
   );
 
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const result = await fetchData();
+      setData(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const result = await fetchData();
-        setData(result);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
-      } finally {
-        setLoading(false);
-      }
-    };
     loadData();
   }, []);
 
@@ -57,11 +59,12 @@ const PerencanaanTable = () => {
     try {
       setLoading(true);
       await Promise.all(
-        Object.entries(changedItems).map(([id, progres]) =>
-          updateData(id, progres)
-        )
+        Object.entries(changedItems).map(async ([id, progres]) => {
+          await updateData(id, progres);
+        })
       );
       setChangedItems({});
+      await loadData(); // Reload data after sync
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
