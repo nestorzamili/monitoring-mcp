@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import React from "react";
 import { Perencanaan } from "./types";
 import { fetchData, updateData } from "./api";
@@ -40,7 +40,7 @@ const PerencanaanTable = () => {
     loadData();
   }, []);
 
-  const handleStatusChange = (itemId: number, checked: boolean) => {
+  const handleStatusChange = (itemId: string, checked: boolean) => {
     setData((prevData) =>
       prevData.map((perencanaan) => ({
         ...perencanaan,
@@ -64,7 +64,7 @@ const PerencanaanTable = () => {
         })
       );
       setChangedItems({});
-      await loadData(); // Reload data after sync
+      await loadData();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -72,46 +72,60 @@ const PerencanaanTable = () => {
     }
   };
 
-  if (loading)
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Button variant="ghost" disabled>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Mohon tunggu
-        </Button>
-      </div>
-    );
-  if (error) return <div>Error: {error}</div>;
-
   return (
-    <div className="flex flex-col items-end space-y-2">
-      <Button
-        onClick={syncChanges}
-        disabled={Object.keys(changedItems).length === 0}
-      >
-        SYNC
-      </Button>
-      <Card>
-        <CardContent>
-          <Table className="w-full table-auto text-sm text-left text-gray-700">
-            <TableHeader>
+    <Card>
+      <CardHeader className="flex flex-row items-center">
+        <div className="grid gap-2">
+          <CardTitle>Perencanaan</CardTitle>
+        </div>
+        <Button
+          className="ml-auto gap-1"
+          onClick={syncChanges}
+          disabled={Object.keys(changedItems).length === 0}
+        >
+          SYNC
+        </Button>
+      </CardHeader>
+      <CardContent>
+        <Table className="w-full table-auto text-sm text-left text-gray-700">
+          <TableHeader>
+            <TableRow>
+              {[
+                "ITEM",
+                "TARGET",
+                "PROGRES",
+                "INSTANSI",
+                "STATUS",
+                "TANGGAL LAPOR",
+                "TANGGAL VERIFIKASI",
+                "KETERANGAN",
+              ].map((head) => (
+                <TableHead key={head} className="font-semibold">
+                  {head}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          {loading ? (
+            <TableBody>
               <TableRow>
-                {[
-                  "PERENCANAAN",
-                  "TARGET",
-                  "PROGRES",
-                  "INSTANSI",
-                  "STATUS",
-                  "TANGGAL LAPOR",
-                  "TANGGAL VERIFIKASI",
-                  "KETERANGAN",
-                ].map((head) => (
-                  <TableHead key={head} className="font-semibold">
-                    {head}
-                  </TableHead>
-                ))}
+                <TableCell colSpan={8} className="text-center">
+                  <Button variant="ghost" disabled>
+                    <Loader2 className="animate-spin h-5 w-5 mr-3" />
+                    Loading...
+                  </Button>
+                </TableCell>
               </TableRow>
-            </TableHeader>
+            </TableBody>
+          ) : error ? (
+            <TableBody>
+              <TableRow>
+                <TableCell colSpan={8} className="text-center">
+                  <div className="text-red-500">{error}</div>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          ) : (
             <TableBody>
               {data.map((perencanaan) => (
                 <React.Fragment key={perencanaan.id}>
@@ -128,14 +142,14 @@ const PerencanaanTable = () => {
                         ? new Date(
                             perencanaan.tanggal_lapor
                           ).toLocaleDateString("id-ID")
-                        : "-"}
+                        : ""}
                     </TableCell>
                     <TableCell>
                       {perencanaan.tanggal_verifikasi
                         ? new Date(
                             perencanaan.tanggal_verifikasi
                           ).toLocaleDateString("id-ID")
-                        : "-"}
+                        : ""}
                     </TableCell>
                     <TableCell>{perencanaan.keterangan}</TableCell>
                   </TableRow>
@@ -180,10 +194,10 @@ const PerencanaanTable = () => {
                 </React.Fragment>
               ))}
             </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
+          )}
+        </Table>
+      </CardContent>
+    </Card>
   );
 };
 

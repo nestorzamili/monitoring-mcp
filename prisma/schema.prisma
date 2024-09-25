@@ -14,6 +14,7 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
 
+// Perencanaan
 model Perencanaan {
   id                String           @id @default(uuid())
   nama_perencanaan  String
@@ -45,6 +46,59 @@ model ItemSubPerencanaan {
   id                 String           @id @default(uuid())
   sub_perencanaan    SubPerencanaan   @relation(fields: [subPerencanaanId], references: [id])
   subPerencanaanId   String
+  nama_item          String
+  progres            Boolean
+  status             String
+  instansi           String
+  created_at         DateTime         @default(now())
+  updated_at         DateTime         @updatedAt
+}
+
+// Penganggaran
+model Penganggaran {
+  id                String           @id @default(uuid())
+  nama_penganggaran String
+  target            Int
+  progres           Int
+  status            String?
+  tanggal_lapor     DateTime?
+  tanggal_verifikasi DateTime?
+  keterangan        String?
+  created_at        DateTime         @default(now())
+  updated_at        DateTime         @updatedAt
+  sub_penganggaran   SubPenganggaran[]
+}
+
+model SubPenganggaran {
+  id                 String           @id @default(uuid())
+  penganggaran       Penganggaran     @relation(fields: [penganggaranId], references: [id])
+  penganggaranId     String
+  nama_sub_penganggaran String
+  target             Int
+  progres            Int
+  status             String
+  created_at         DateTime         @default(now())
+  updated_at         DateTime         @updatedAt
+  item_sub_penganggaran ItemSubPenganggaran[]
+}
+
+model ItemSubPenganggaran {
+  id                 String           @id @default(uuid())
+  sub_penganggaran   SubPenganggaran  @relation(fields: [SubPenganggaranId], references: [id])
+  SubPenganggaranId  String
+  nama_item_sub_penganggaran          String
+  target             Int
+  progres            Int
+  status             String
+  created_at         DateTime         @default(now())
+  updated_at         DateTime         @updatedAt
+  item_penganggaran   ItemPenganggaran[]
+}
+
+model ItemPenganggaran {
+  id                 String           @id @default(uuid())
+  item_sub_penganggaran    ItemSubPenganggaran   @relation(fields: [ItemSubPenganggaranId], references: [id])
+  ItemSubPenganggaranId   String
   nama_item          String
   progres            Boolean
   status             String

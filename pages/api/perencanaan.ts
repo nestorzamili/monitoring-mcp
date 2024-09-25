@@ -22,16 +22,13 @@ export default async function handler(
       case "PUT":
         const { id, progres: updatedProgres } = req.body;
 
-        // Update progres di ItemSubPerencanaan
         const updatedItem = await prisma.itemSubPerencanaan.update({
           where: { id },
           data: { progres: updatedProgres },
         });
 
-        // Ambil subPerencanaanId dari item yang diupdate
         const subPerencanaanId = updatedItem.subPerencanaanId;
 
-        // Hitung jumlah itemSubPerencanaan yang progres = true
         const countTrueProgres = await prisma.itemSubPerencanaan.count({
           where: {
             subPerencanaanId: subPerencanaanId,
@@ -39,14 +36,12 @@ export default async function handler(
           },
         });
 
-        // Hitung total itemSubPerencanaan dalam subPerencanaan ini
         const totalItems = await prisma.itemSubPerencanaan.count({
           where: {
             subPerencanaanId: subPerencanaanId,
           },
         });
 
-        // Dapatkan target dari SubPerencanaan
         const subPerencanaan = await prisma.subPerencanaan.findUnique({
           where: { id: subPerencanaanId },
           select: { target: true, perencanaanId: true },
@@ -56,26 +51,21 @@ export default async function handler(
           return res.status(404).json({ error: "SubPerencanaan not found" });
         }
 
-        // Hitung nilai progres baru untuk SubPerencanaan
         const newProgres =
           (countTrueProgres * subPerencanaan.target) / totalItems;
 
-        // Update progres di SubPerencanaan
         await prisma.subPerencanaan.update({
           where: { id: subPerencanaanId },
           data: { progres: newProgres },
         });
 
-        // Setelah mengupdate progres di SubPerencanaan, update progres di Perencanaan
         const perencanaanId = subPerencanaan.perencanaanId;
 
-        // Hitung total progres di SubPerencanaan untuk Perencanaan terkait
         const totalProgres = await prisma.subPerencanaan.aggregate({
           where: { perencanaanId: perencanaanId },
           _sum: { progres: true },
         });
 
-        // Update progres di Perencanaan
         await prisma.perencanaan.update({
           where: { id: perencanaanId },
           data: { progres: totalProgres._sum.progres || 0 },
