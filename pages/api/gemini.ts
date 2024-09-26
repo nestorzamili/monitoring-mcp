@@ -36,6 +36,7 @@ export default async function handler(
       const result = await chatSession.sendMessage(message);
       res.status(200).json({ response: result.response.text() });
     } catch (error) {
+      console.error("Failed to generate response:", error);
       res.status(500).json({ error: "Failed to generate response" });
     }
   } else {

@@ -41,6 +41,10 @@ const Playground: React.FC = () => {
         body: JSON.stringify({ message }),
       });
 
+      if (!res.ok) {
+        throw new Error(`Failed to send message: ${res.statusText}`);
+      }
+
       const data = await res.json();
 
       setMessages((prevMessages) => [
@@ -48,6 +52,8 @@ const Playground: React.FC = () => {
         { sender: "bot", text: data.response, isMarkdown: true },
       ]);
     } catch (error) {
+      console.error("Failed to send message:", error);
+
       setMessages((prevMessages) => [
         ...prevMessages,
         { sender: "bot", text: "Sorry, something went wrong." },

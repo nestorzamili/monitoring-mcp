@@ -46,6 +46,7 @@ export default async function handler(
 
       res.status(200).json(sortedCombinedItems);
     } catch (error) {
+      console.error("Failed to fetch data:", error);
       res.status(500).json({ error: "Terjadi kesalahan saat mengambil data" });
     }
   } else {
