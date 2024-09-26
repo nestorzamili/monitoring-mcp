@@ -40,7 +40,7 @@ const PerencanaanTable = () => {
     loadData();
   }, []);
 
-  const handleStatusChange = (itemId: string, checked: boolean) => {
+  const handleStatusChange = (itemId: number, checked: boolean) => {
     setData((prevData) =>
       prevData.map((perencanaan) => ({
         ...perencanaan,
@@ -60,7 +60,7 @@ const PerencanaanTable = () => {
       setLoading(true);
       await Promise.all(
         Object.entries(changedItems).map(async ([id, progres]) => {
-          await updateData(id, progres);
+          await updateData(Number(id), progres);
         })
       );
       setChangedItems({});

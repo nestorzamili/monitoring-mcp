@@ -12,7 +12,7 @@ export const fetchData = async (): Promise<Perencanaan[]> => {
 };
 
 // update value progress itemsubperencanaan
-export const updateData = async (id: string, progres: boolean) => {
+export const updateData = async (id: number, progres: boolean) => {
   await fetch("/api/perencanaan", {
     method: "PUT",
     headers: {

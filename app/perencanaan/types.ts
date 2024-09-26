@@ -1,5 +1,5 @@
 export interface ItemSubPerencanaan {
-  id: string;
+  id: number;
   nama_item: string;
   progres: boolean;
   status: string;
@@ -7,7 +7,7 @@ export interface ItemSubPerencanaan {
 }
 
 export interface SubPerencanaan {
-  id: string;
+  id: number;
   nama_sub_perencanaan: string;
   target: number;
   progres: number;
@@ -15,7 +15,7 @@ export interface SubPerencanaan {
 }
 
 export interface Perencanaan {
-  id: string;
+  id: number;
   nama_perencanaan: string;
   target: number;
   progres: number;

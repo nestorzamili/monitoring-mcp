@@ -40,7 +40,7 @@ export default function Component() {
     loadData();
   }, []);
 
-  const handleStatusChange = (itemId: string, checked: boolean) => {
+  const handleStatusChange = (itemId: number, checked: boolean) => {
     setData((prevData) =>
       prevData.map((penganggaran) => ({
         ...penganggaran,
@@ -63,7 +63,7 @@ export default function Component() {
       setLoading(true);
       await Promise.all(
         Object.entries(changedItems).map(async ([id, progres]) => {
-          await updateData(id, progres);
+          await updateData(Number(id), progres);
         })
       );
       setChangedItems({});

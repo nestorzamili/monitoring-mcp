@@ -12,7 +12,7 @@ export default async function handler(
           orderBy: {
             updated_at: "desc",
           },
-          take: 3,
+          take: 6,
           select: {
             nama_item: true,
             progres: true,
@@ -24,7 +24,7 @@ export default async function handler(
         orderBy: {
           updated_at: "desc",
         },
-        take: 3,
+        take: 6,
         select: {
           nama_item: true,
           progres: true,
@@ -42,7 +42,7 @@ export default async function handler(
           new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
       );
 
-      // sortedCombinedItems.splice(5);
+      sortedCombinedItems.splice(6);
 
       res.status(200).json(sortedCombinedItems);
     } catch (error) {

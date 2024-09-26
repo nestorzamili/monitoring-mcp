@@ -18,9 +18,18 @@ export default async function handler(
                   include: {
                     item_penganggaran: true,
                   },
+                  orderBy: {
+                    id: "asc",
+                  },
                 },
               },
+              orderBy: {
+                id: "asc",
+              },
             },
+          },
+          orderBy: {
+            id: "asc",
           },
         });
         return res.status(200).json(allPenganggaran);

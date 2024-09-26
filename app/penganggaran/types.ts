@@ -1,5 +1,5 @@
 export interface ItemPenganggaran {
-  id: string;
+  id: number;
   nama_item: string;
   progres: boolean;
   status: string;
@@ -8,7 +8,7 @@ export interface ItemPenganggaran {
 
 export interface ItemSubPenganggaran {
   instansi: string;
-  id: string;
+  id: number;
   nama_item_sub_penganggaran: string;
   target: number;
   progres: number;
@@ -17,7 +17,7 @@ export interface ItemSubPenganggaran {
 }
 
 export interface SubPenganggaran {
-  id: string;
+  id: number;
   nama_sub_penganggaran: string;
   target: number;
   progres: number;
@@ -26,7 +26,7 @@ export interface SubPenganggaran {
 }
 
 export interface Penganggaran {
-  id: string;
+  id: number;
   nama_penganggaran: string;
   target: number;
   progres: number;

@@ -63,7 +63,7 @@ export default function Sidebar() {
         </div>
         <div className="flex h-14 items-center px-4 lg:h-[60px] lg:px-6">
           <Link
-            href="https://nestorzamili.github.io"
+            href="https://www.linkedin.com/in/nestor-zamili/"
             className="flex items-center gap-2"
           >
             <span className="text-xs">Build by Samunu</span>
