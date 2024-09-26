@@ -13,7 +13,7 @@ interface Message {
   isMarkdown?: boolean;
 }
 
-export function Playground() {
+const Playground: React.FC = () => {
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -48,7 +48,6 @@ export function Playground() {
         { sender: "bot", text: data.response, isMarkdown: true },
       ]);
     } catch (error) {
-      console.error("Error fetching response:", error);
       setMessages((prevMessages) => [
         ...prevMessages,
         { sender: "bot", text: "Sorry, something went wrong." },
@@ -124,6 +123,6 @@ export function Playground() {
       </div>
     </div>
   );
-}
+};
 
 export default Playground;

@@ -13,15 +13,11 @@ export const fetchData = async (): Promise<Perencanaan[]> => {
 
 // update value progress itemsubperencanaan
 export const updateData = async (id: string, progres: boolean) => {
-  try {
-    await fetch("/api/perencanaan", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ id, progres }),
-    });
-  } catch (err) {
-    console.error("Failed to update data:", err);
-  }
+  await fetch("/api/perencanaan", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ id, progres }),
+  });
 };
