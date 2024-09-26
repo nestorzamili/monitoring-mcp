@@ -42,7 +42,7 @@ export default async function handler(
           new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
       );
 
-      sortedCombinedItems.splice(5);
+      // sortedCombinedItems.splice(5);
 
       res.status(200).json(sortedCombinedItems);
     } catch (error) {
