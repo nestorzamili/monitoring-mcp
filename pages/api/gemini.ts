@@ -1,45 +1,56 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { StreamingTextResponse, GoogleGenerativeAIStream, Message } from "ai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const apiKey = process.env.GEMINI_API_KEY;
-if (!apiKey) {
-  throw new Error("GEMINI_API_KEY is not defined");
+export const runtime = "edge";
+
+export async function POST(req: Request) {
+  const reqBody = await req.json();
+  const images: string[] = JSON.parse(reqBody.data.images);
+  const imageParts = filesArrayToGenerativeParts(images);
+  const messages: Message[] = reqBody.messages;
+
+  const modelName = "gemini-1.5-flash";
+  const promptWithParts =
+    imageParts.length > 0
+      ? [getLastUserMessage(messages), ...imageParts].filter(
+          (part) => part !== undefined
+        )
+      : buildGoogleGenAIPrompt(messages);
+
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+  const model = genAI.getGenerativeModel({ model: modelName });
+
+  const streamingResponse = await model.generateContentStream(promptWithParts);
+  return new StreamingTextResponse(GoogleGenerativeAIStream(streamingResponse));
 }
 
-const genAI = new GoogleGenerativeAI(apiKey);
-
-const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash",
-});
-
-const generationConfig = {
-  temperature: 1,
-  topP: 0.95,
-  topK: 64,
-  maxOutputTokens: 8192,
-  responseMimeType: "text/plain",
-};
-
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method === "POST") {
-    const { message } = req.body;
-
-    try {
-      const chatSession = model.startChat({
-        generationConfig,
-        history: [],
-      });
-
-      const result = await chatSession.sendMessage(message);
-      res.status(200).json({ response: result.response.text() });
-    } catch (error) {
-      console.error("Failed to generate response:", error);
-      res.status(500).json({ error: "Failed to generate response" });
-    }
-  } else {
-    res.status(405).json({ error: "Method not allowed" });
-  }
+function getLastUserMessage(messages: Message[]): string | undefined {
+  return messages.filter((message) => message.role === "user").pop()?.content;
 }
+
+function buildGoogleGenAIPrompt(messages: Message[]) {
+  return {
+    contents: messages
+      .filter(
+        (message) => message.role === "user" || message.role === "assistant"
+      )
+      .map((message) => ({
+        role: message.role === "user" ? "user" : "model",
+        parts: [{ text: message.content }],
+      })),
+  };
+}
+
+function filesArrayToGenerativeParts(images: string[]) {
+  return images.map((imageData) => ({
+    inlineData: {
+      data: imageData.split(",")[1],
+      mimeType: imageData.substring(
+        imageData.indexOf(":") + 1,
+        imageData.lastIndexOf(";")
+      ),
+    },
+  }));
+}
+
+export default POST;

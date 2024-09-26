@@ -26,6 +26,11 @@ body {
   }
 }
 
+#chatbox a {
+  color: #0842a0;
+  font-weight: bold;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
