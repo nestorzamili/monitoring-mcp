@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
+import cache from "@/lib/cache";
 
 export default async function handler(
   req: NextApiRequest,
@@ -8,25 +9,26 @@ export default async function handler(
   try {
     switch (req.method) {
       case "GET":
-        const allPerencanaan = await prisma.perencanaan.findMany({
-          include: {
-            sub_perencanaan: {
-              include: {
-                item_sub_perencanaan: {
-                  orderBy: {
-                    id: "asc",
+        const cacheKey = "allPerencanaan";
+        let allPerencanaan = cache.get(cacheKey);
+
+        if (!allPerencanaan) {
+          allPerencanaan = await prisma.perencanaan.findMany({
+            include: {
+              sub_perencanaan: {
+                include: {
+                  item_sub_perencanaan: {
+                    orderBy: { id: "asc" },
                   },
                 },
-              },
-              orderBy: {
-                id: "asc",
+                orderBy: { id: "asc" },
               },
             },
-          },
-          orderBy: {
-            id: "asc",
-          },
-        });
+            orderBy: { id: "asc" },
+          });
+          cache.set(cacheKey, allPerencanaan);
+        }
+
         return res.status(200).json(allPerencanaan);
 
       case "PUT":
@@ -37,19 +39,19 @@ export default async function handler(
           data: { progres: updatedProgres },
         });
 
+        cache.flushAll();
+
         const subPerencanaanId = updatedItem.subPerencanaanId;
 
         const countTrueProgres = await prisma.itemSubPerencanaan.count({
           where: {
-            subPerencanaanId: subPerencanaanId,
+            subPerencanaanId,
             progres: true,
           },
         });
 
         const totalItems = await prisma.itemSubPerencanaan.count({
-          where: {
-            subPerencanaanId: subPerencanaanId,
-          },
+          where: { subPerencanaanId },
         });
 
         const subPerencanaan = await prisma.subPerencanaan.findUnique({
@@ -72,7 +74,7 @@ export default async function handler(
         const perencanaanId = subPerencanaan.perencanaanId;
 
         const totalProgres = await prisma.subPerencanaan.aggregate({
-          where: { perencanaanId: perencanaanId },
+          where: { perencanaanId },
           _sum: { progres: true },
         });
 
