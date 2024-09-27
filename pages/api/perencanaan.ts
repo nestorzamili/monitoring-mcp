@@ -64,7 +64,7 @@ export default async function handler(
         }
 
         const newProgres =
-          (countTrueProgres * subPerencanaan.target) / totalItems;
+          (countTrueProgres * Number(subPerencanaan.target)) / totalItems;
 
         await prisma.subPerencanaan.update({
           where: { id: subPerencanaanId },

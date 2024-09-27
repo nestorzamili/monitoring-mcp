@@ -69,7 +69,7 @@ export default async function handler(
         }
 
         const newProgres =
-          (countTrueProgres * ItemSubPenganggaran.target) / totalItems;
+          (countTrueProgres * Number(ItemSubPenganggaran.target)) / totalItems;
 
         await prisma.itemSubPenganggaran.update({
           where: { id: ItemSubPenganggaranId },
@@ -96,7 +96,7 @@ export default async function handler(
         const targetSubPenganggaran = SubPenganggaran.target;
 
         const newSubPenganggaranProgres =
-          (totalProgresItem / 100) * targetSubPenganggaran;
+          (Number(totalProgresItem) / 100) * Number(targetSubPenganggaran);
 
         await prisma.subPenganggaran.update({
           where: { id: SubPenganggaranId },
@@ -125,7 +125,8 @@ export default async function handler(
         const targetPenganggaran = Penganggaran.target;
 
         const newPenganggaranProgres =
-          (totalProgresSubPenganggaran / 100) * targetPenganggaran;
+          (Number(totalProgresSubPenganggaran) / 100) *
+          Number(targetPenganggaran);
 
         await prisma.penganggaran.update({
           where: { id: penganggaranId },
