@@ -18,8 +18,8 @@ datasource db {
 model Perencanaan {
   id                 Int              @id @default(autoincrement())
   nama_perencanaan   String
-  target             Int
-  progres            Int
+  target             Decimal
+  progres            Decimal
   status             String?
   tanggal_lapor      DateTime?
   tanggal_verifikasi DateTime?
@@ -34,8 +34,8 @@ model SubPerencanaan {
   perencanaan          Perencanaan          @relation(fields: [perencanaanId], references: [id])
   perencanaanId        Int
   nama_sub_perencanaan String
-  target               Int
-  progres              Int
+  target               Decimal
+  progres              Decimal
   status               String
   created_at           DateTime             @default(now())
   updated_at           DateTime             @updatedAt
@@ -58,8 +58,8 @@ model ItemSubPerencanaan {
 model Penganggaran {
   id                 Int               @id @default(autoincrement())
   nama_penganggaran  String
-  target             Int
-  progres            Int
+  target             Decimal
+  progres            Decimal
   status             String?
   tanggal_lapor      DateTime?
   tanggal_verifikasi DateTime?
@@ -74,8 +74,8 @@ model SubPenganggaran {
   penganggaran          Penganggaran          @relation(fields: [penganggaranId], references: [id])
   penganggaranId        Int
   nama_sub_penganggaran String
-  target                Int
-  progres               Int
+  target                Decimal
+  progres               Decimal
   status                String
   created_at            DateTime              @default(now())
   updated_at            DateTime              @updatedAt
@@ -87,8 +87,8 @@ model ItemSubPenganggaran {
   sub_penganggaran           SubPenganggaran    @relation(fields: [SubPenganggaranId], references: [id])
   SubPenganggaranId          Int
   nama_item_sub_penganggaran String
-  target                     Int
-  progres                    Int
+  target                     Decimal
+  progres                    Decimal
   status                     String
   created_at                 DateTime           @default(now())
   updated_at                 DateTime           @updatedAt

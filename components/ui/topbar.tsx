@@ -37,6 +37,11 @@ const navItems = [
     label: "OPTIMALISASI PAJAK",
     icon: DollarSign,
   },
+  {
+    href: "/playground",
+    label: "PLAYGROUND",
+    icon: Home,
+  },
 ];
 
 export default function Topbar() {
